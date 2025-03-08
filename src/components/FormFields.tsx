@@ -59,9 +59,8 @@ const Numberbox = ({ data, handleChange, name, 'aria-describedby': ariaDescribed
                     autoComplete={autoComplete}
                     onChange={(e: any) => {
                         const re = /^[0-9\b]+$/;
-                        if (e.target.value === '' || re.test(e.target.value)
-                        && (!min || (min && min<e.target.value)) &&
-                        (!max || (max && max>e.target.value))) {
+                        if ((e.target.value === '' || re.test(e.target.value))
+                        ) {
                             handleChange(e.target.value, name, data);
                         }
                     }}
@@ -207,8 +206,8 @@ const TextArea = ({ data, handleChange, name, 'aria-describedby': ariaDescribedB
                 onChange={(e: any) => handleChange(e.target.value, name, data)}
                 placeholder={placeholder || label}
                 {...fieldProps}
-                className={`${className} py-2 px-3 sm:py-3 sm:px-4 block w-full border-${error ? "red" : "gray"}-200 rounded-lg sm:text-sm focus:border-${error ? "red" : "blue"}-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600`}
-            />
+                className={`${className} border-1 peer block w-full appearance-none rounded-lg border border-${error ? "red" : "gray"}-300 bg-transparent px-2.5 pb-2.5 pt-4 text-sm text-${error ? "red" : "gray"}-900 focus:${error ? "border-red-600" : "border-blue-600"} focus:outline-none focus:ring-0`}
+                />
             {error && <p id={id || key || name} className="mt-2 text-xs text-red-600 dark:text-red-400">{error}</p>}
         </div>
     );

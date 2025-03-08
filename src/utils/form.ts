@@ -62,7 +62,16 @@ export function fetchFormBuilderJson(questions: Array<any>) {
                     min: question.min,
                     max: question.max,
                     required: question.isRequired,
-                    hidden: question.isHidden
+                    hidden: question.isHidden,
+                    validationCB: function(field: any) {
+                        const value = field.value;
+                        if (!(value>=field.min && value<=field.max)) {
+                            return {
+                                valid: false,
+                                message: `Value should between ${field.min} and ${field.max}`
+                            }
+                        }
+                    }
                 })
                 break;
             case "select":

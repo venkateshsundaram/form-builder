@@ -69,7 +69,7 @@ export const FormBuilder = (props: IFormBuilderProps) => {
         fieldParams = {
           ...fieldParams,
           "aria-invalid": error,
-          error: error ? "Field Required" : "",
+          error: error ? fieldError || "Field Required" : "",
           variant: !fieldItem.noVariant && error ? "error" : ""
         }
       }
