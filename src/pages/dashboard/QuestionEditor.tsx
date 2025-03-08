@@ -99,7 +99,9 @@ export default function QuestionEditor({ question, onChange, onDelete, isSaving,
           ...prev,
           questionType: value,
           isParagraph: false,
-          numberType: ""
+          numberType: "",
+          min: "",
+          max: ""
         }));
         break;
       case "isParagraph":
