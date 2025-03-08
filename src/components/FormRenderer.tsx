@@ -30,7 +30,9 @@ const FormRenderer = ({ formId = "", savedQuestions }: any) => {
     
     const handleFormSubmit = () => {
         const values = formState.values;
-        if (isFormValid(values)) {
+        const errors: any = formState.errors;
+        const errorKeys = Object.keys(errors);
+        if (isFormValid(values) && !errorKeys.some((key: string) => errors[key])) {
             confirm(JSON.stringify(values))
         }
     }
