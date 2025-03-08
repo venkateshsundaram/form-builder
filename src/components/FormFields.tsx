@@ -161,4 +161,23 @@ const Listbox = ({ data, handleChange, name, 'aria-describedby': ariaDescribedBy
     );
 }
 
+export const Buttons = ({ data, handleChange, name, 'aria-describedby': ariaDescribedBy, id = "", key = "" }: IFormFieldsProps) => {
+    const { className = "", style = {}, label = "", fieldProps = {}, color = "blue" } = data;
+
+    return (
+        <button 
+            type="button"
+            style={style}
+            aria-describedby={ariaDescribedBy}
+            id={id || key || name}
+            {...fieldProps}
+            onClick={(e: any) => {
+                e.preventDefault();
+                handleChange(e.target.checked, name, data);
+            }}
+            className={`${className} px-3 py-2 text-${color}-500 hover:text-${color}-700`}>
+            {label}
+        </button>
+    );
+}
 export { Textbox, Listbox, Numberbox, CheckBox, RadioBox };

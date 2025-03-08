@@ -6,6 +6,13 @@
 .layout-horizontal {
     display: flex;
     flex-direction: row;
-    align-items: flex-end;
     justify-content: space-between;
+}
+
+.border-red-300 {
+    border: 1px solid red;
+}
+
+.text-red-500 {
+    color: red
 }

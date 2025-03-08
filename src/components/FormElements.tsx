@@ -1,4 +1,4 @@
-import { Textbox, Listbox, Numberbox, CheckBox, RadioBox } from "./FormFields";
+import { Textbox, Listbox, Numberbox, CheckBox, RadioBox, Buttons } from "./FormFields";
 
 interface IFormElementsProps {
     type: string;
@@ -12,7 +12,8 @@ export const FormElements = (props: IFormElementsProps) => {
         list: Listbox,
         checkbox: CheckBox,
         number: Numberbox,
-        radio: RadioBox
+        radio: RadioBox,
+        button: Buttons
     };
 
     const Component = componentsMap[type] || null;

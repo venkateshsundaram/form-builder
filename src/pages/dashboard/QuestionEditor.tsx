@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { ChevronUp, ChevronDown, GripVertical, Trash2, Loader2, Check } from 'lucide-react';
+import { toast } from "react-hot-toast";
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import clsx from 'clsx';
 
 import { Question } from '../../types/form';
 
-import { QUESTION_FORMS_JSON } from "../../constants/forms";
-
+import { fetchQuestionFormJson } from "../../constants/forms";
+import { DEFAULT_SELECT_OPTIONS } from "../../constants/application";
 import { FormBuilder } from '../../components/FormBuilder';
 
 import { debounce } from '../../utils/api';
@@ -17,7 +18,7 @@ interface QuestionEditorProps {
   question: Question;
   onChange: (question: Question) => void;
   onDelete: (id: string) => void;
-  resetSavedStaus: (id: string) => void;
+  resetSavedStaus: () => void;
   isSaving?: boolean;
   saved?: boolean;
 }
@@ -26,7 +27,10 @@ export default function QuestionEditor({ question, onChange, onDelete, isSaving,
   const [localQuestion, setLocalQuestion] = useState(question);
   const [isExpanded, setIsExpanded] = useState(false);
   const [formState, setFormState] = useState({ values: {}, touched: {}, errors: {} });
-
+  const [formJson, setFormJson] = useState<any>();
+  const [savedState, setSavingState] = useState(saved);
+  const [selectedOptions, setSelectedOptions] = useState<any>(DEFAULT_SELECT_OPTIONS);
+  const [onChangeTouched, setOnChangeTouched] = useState(false);
   const {
     attributes,
     listeners,
@@ -35,19 +39,25 @@ export default function QuestionEditor({ question, onChange, onDelete, isSaving,
     transition,
     isDragging
   } = useSortable({ id: question.id });
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
 
-  const debouncedHandleInput = debounce(onChange, 300);
+  const debouncedHandleInput = debounce(onChange, 500);
 
   useEffect(() => {
-    if (isQuestionValid(localQuestion)) {
+    if (onChangeTouched && isQuestionValid(localQuestion)) {
       debouncedHandleInput(localQuestion)
     }
-  }, [localQuestion, onChange]);
+  }, [localQuestion, onChange, onChangeTouched]);
+
+  useEffect(() => {
+    setSavingState(saved);
+    if (saved) {
+      toast.success('Question saved');
+    }
+  }, [saved])
 
   useEffect(() => {
     if (!localQuestion.label) {
@@ -59,6 +69,7 @@ export default function QuestionEditor({ question, onChange, onDelete, isSaving,
     setFormState(prev => ({
       ...prev,
       values: {
+        ...question,
         title: question.label,
         questionType: question.questionType,
         isParagraph: question.isParagraph,
@@ -70,10 +81,29 @@ export default function QuestionEditor({ question, onChange, onDelete, isSaving,
         helpText: question.helpText
       }
     }));
+    const questionKeys = Object.keys(question);
+    const selectedOptionKeys = questionKeys.filter((key)=> key.includes("selectOption") && question[key as keyof typeof question]);
+    const newOptions = selectedOptionKeys.length >0 ? selectedOptionKeys.map((key: string) => {
+      return {
+        layout: "horizontal",
+        attributes: [{
+          name: key,
+          label: "Option",
+          type: "text"
+        }, {
+          name: `delete${key}`,
+          label: "Remove",
+          type: "button",
+          color: "red"
+        }]
+      }
+    }) : selectedOptions;
+    setSelectedOptions(newOptions)
+    setFormJson(fetchQuestionFormJson({ selectedOptions: newOptions }));
   }, []);
 
   const isQuestionValid = (q: Question): boolean => {
-    const mandatoryFields = fetchFormMandatoryFields(QUESTION_FORMS_JSON, formState);
+    const mandatoryFields = fetchFormMandatoryFields(formJson, formState);
     const keys = Object.keys(mandatoryFields);
     return keys.every((key: string) => q[key as keyof typeof q]);
   };
@@ -86,73 +116,158 @@ export default function QuestionEditor({ question, onChange, onDelete, isSaving,
   };
 
   const handleFieldChange = (value: any, name: string, data: any) => {
+    let newValues: any = {};
 
-    switch (name) {
-      case "title":
-        setLocalQuestion(prev => ({
-          ...prev,
-          label: value,
-          title: value
-        }));
-        break;
-      case "questionType":
-        setLocalQuestion(prev => ({
-          ...prev,
-          questionType: value,
-          isParagraph: false,
-          numberType: "",
-          min: "",
-          max: ""
-        }));
-        break;
-      case "isParagraph":
-        setLocalQuestion(prev => ({
-          ...prev,
-          isParagraph: value
-        }));
-        break;
-      case "numberType":
-        setLocalQuestion(prev => ({
-          ...prev,
-          numberType: value,
-          min: "",
-          max: ""
-        }));
-        break;
-      case "min":
-        setLocalQuestion(prev => ({
-          ...prev,
-          min: value
-        }));
-        break;
-      case "max":
-        setLocalQuestion(prev => ({
-          ...prev,
-          max: value
-        }));
-        break;
-      case "required":
-        setLocalQuestion(prev => ({
-          ...prev,
-          required: value
-        }));
-        break;
-      case "hidden":
-        setLocalQuestion(prev => ({
-          ...prev,
-          hidden: value
-        }));
-        break;
-      case "helpText":
-        setLocalQuestion(prev => ({
-          ...prev,
-          helpText: value
-        }));
-        break;
-      default:
-        break;
+    if (name.includes("deleteselectOption")) {
+      const newOptions = selectedOptions.filter((option: any) => option.attributes[1].name !== name);
+      const key = name.replace("delete", "").trim();
+      newValues = {
+        [key]: ""
+      }
+      setLocalQuestion(prev => ({
+        ...prev,
+        [key]: ""
+      }));
+      setOnChangeTouched(true);
+      setSelectedOptions(newOptions);
+      setFormJson(fetchQuestionFormJson({ selectedOptions: newOptions }));
+    } else if (name.includes("addOption")) {
+      const newOptions = selectedOptions.concat({
+        layout: "horizontal",
+        attributes: [{
+          name: `selectOption${selectedOptions.length + 1}`,
+          label: "Option",
+          type: "text"
+        }, {
+          name: `deleteselectOption${selectedOptions.length + 1}`,
+          label: "Remove",
+          type: "button",
+          color: "red"
+        }]
+      });
+      setSelectedOptions(newOptions);
+      setFormJson(fetchQuestionFormJson({ selectedOptions: newOptions }));
+    }  else {
+      switch (name) {
+        case "title":
+          newValues = {
+            label: value,
+            title: value
+          };
+          setLocalQuestion(prev => ({
+            ...prev,
+            ...newValues
+          }));
+          break;
+        case "questionType":
+          newValues = {
+            questionType: value,
+            isParagraph: false,
+            numberType: "",
+            min: "",
+            max: ""
+          };
+          setLocalQuestion(prev => ({
+            ...prev,
+            ...newValues
+          }));
+          resetSavedStaus();
+          break;
+        case "isParagraph":
+          newValues = {
+            isParagraph: value
+          }
+          setLocalQuestion(prev => ({
+            ...prev,
+            ...newValues
+          }));
+          break;
+        case "numberType":
+          newValues = {
+            numberType: value,
+            min: "",
+            max: ""
+          }
+          setLocalQuestion(prev => ({
+            ...prev,
+            ...newValues
+          }));
+          resetSavedStaus();
+          break;
+        case "min":
+          newValues = {
+            min: value
+          }
+          setLocalQuestion(prev => ({
+            ...prev,
+            ...newValues
+          }));
+          break;
+        case "max":
+          newValues = {
+            max: value
+          }
+          setLocalQuestion(prev => ({
+            ...prev,
+            ...newValues
+          }));
+          break;
+        case "required":
+          newValues = {
+            required: value
+          }
+          setLocalQuestion(prev => ({
+            ...prev,
+            ...newValues
+          }));
+          break;
+        case "hidden":
+          newValues = {
+            hidden: value
+          }
+          setLocalQuestion(prev => ({
+            ...prev,
+            ...newValues
+          }));
+          break;
+        case "helpText":
+          newValues = {
+            helpText: value
+          }
+          setLocalQuestion(prev => ({
+            ...prev,
+            ...newValues
+          }));
+          break;
+        default:
+          newValues = {
+            [name]: value
+          }
+          setLocalQuestion(prev => ({
+            ...prev,
+            ...newValues
+          }));
+          break;
+      }
+      const mandatoryFields = fetchFormMandatoryFields(formJson, data.formState);
+      const keys = Object.keys(mandatoryFields);
+      let errorValues: any = {};
+      const values: any = formState.values;
+      keys.forEach((key: string) => {
+        if ((key === name && !value) || (key !== name && !values[key])) errorValues[key] = true;
+      })
+      setFormState(prev => ({
+        ...prev,
+        values: {
+          ...prev.values,
+          ...newValues
+        },
+        errors: errorValues,
+        touched: errorValues
+      }));
+      setOnChangeTouched(true);
     }
-    setFormState(() => data.formState);
+
   }
 
   return (
@@ -175,10 +290,10 @@ export default function QuestionEditor({ question, onChange, onDelete, isSaving,
         </div>
 
         <div className="flex items-center gap-2">
-          {isSaving ? 
+          {isSaving ?
             <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-          : saved && isExpanded && <Check className="w-6 h-6 text-green-500" />}
-    
+            : savedState && isExpanded && <Check className="w-6 h-6 text-green-500" />}
+
           <button
             onClick={() => onDelete(question.id)}
             className="p-1 text-gray-400 hover:text-red-500 rounded-md"
@@ -188,7 +303,7 @@ export default function QuestionEditor({ question, onChange, onDelete, isSaving,
           <button
             onClick={() => {
               setIsExpanded(!isExpanded)
-              resetSavedStaus(question.id)
+              resetSavedStaus()
             }}
             className="p-1 text-gray-400 hover:text-gray-600 rounded-md"
           >
@@ -203,13 +318,13 @@ export default function QuestionEditor({ question, onChange, onDelete, isSaving,
 
       <div className={clsx("transition-all", !isExpanded && "hidden")}>
         <div className="p-3 border-b">
-            <FormBuilder 
-              formState={formState}
-              id={question.id}
-              handleFieldChange={handleFieldChange} 
-              formJson={QUESTION_FORMS_JSON}
-            />
-          </div>
+          {formJson && <FormBuilder
+            formState={formState}
+            id={question.id}
+            handleFieldChange={handleFieldChange}
+            formJson={formJson}
+          />}
+        </div>
       </div>
     </div>
   );

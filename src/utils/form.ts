@@ -4,7 +4,7 @@ export function fetchFormMandatoryFields(formJson: any, formParams: any = {}) {
     const fields: any = {};
     const params = { ...formParams, fields };
 
-    if (formJson.attributes) {
+    if (formJson?.attributes) {
         appendAttributeMandatoryFields(formJson.attributes, params)
     }
 

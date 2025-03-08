@@ -30,6 +30,8 @@ This Repo consist of below tasks
 
 - **✅ Schema based Generic Form builder** 
 - **✅ Question Editor** 
+- **✅ Delete Questions** 
+- **✅ Rearrange Questions** 
 - **✅ Form Validation** 
 - **✅ API Simulation** 
 - **✅ Resposiveness** 

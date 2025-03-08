@@ -79,7 +79,7 @@ export const FormBuilder = (props: IFormBuilderProps) => {
       const fieldAttrParams = { index: params.hasOwnProperty("index") ? `${params.index}_${fieldItemIndex}`: fieldItemIndex };
 
       if (fieldItem.attributes) {
-        return fieldItem.layout ==="horizontal"? <div key={attrKey}>{showFormAttributes(fieldItem.attributes, fieldAttrParams)}</div>: showFormAttributes(fieldItem.attributes, fieldAttrParams);
+        return fieldItem.layout ==="horizontal"? <div className="layout-horizontal" key={attrKey}>{showFormAttributes(fieldItem.attributes, fieldAttrParams)}</div>: showFormAttributes(fieldItem.attributes, fieldAttrParams);
       } else if (!fieldItem.hidden) {
         return (
           <React.Fragment key={attrKey}>
