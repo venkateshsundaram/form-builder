@@ -119,6 +119,11 @@ export default function QuestionBuilder({ questionsData, questionBuilderId, upda
                                 onDelete={handleDeleteQuestion}
                                 isSaving={savingQuestions.has(question.id)}
                                 saved={savedQuestions.has(question.id)}
+                                resetSavedStaus={() => setSavedQuestions(prev => {
+                                    const next = new Set(prev);
+                                    next.delete(question.id);
+                                    return next;
+                                })}
                             />
                         ))}
                     </SortableContext>

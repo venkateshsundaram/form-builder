@@ -17,11 +17,12 @@ interface QuestionEditorProps {
   question: Question;
   onChange: (question: Question) => void;
   onDelete: (id: string) => void;
+  resetSavedStaus: (id: string) => void;
   isSaving?: boolean;
   saved?: boolean;
 }
 
-export default function QuestionEditor({ question, onChange, onDelete, isSaving, saved }: QuestionEditorProps) {
+export default function QuestionEditor({ question, onChange, onDelete, isSaving, saved, resetSavedStaus }: QuestionEditorProps) {
   const [localQuestion, setLocalQuestion] = useState(question);
   const [isExpanded, setIsExpanded] = useState(false);
   const [formState, setFormState] = useState({ values: {}, touched: {}, errors: {} });
@@ -185,7 +186,10 @@ export default function QuestionEditor({ question, onChange, onDelete, isSaving,
             <Trash2 className="w-5 h-5" />
           </button>
           <button
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={() => {
+              setIsExpanded(!isExpanded)
+              resetSavedStaus(question.id)
+            }}
             className="p-1 text-gray-400 hover:text-gray-600 rounded-md"
           >
             {isExpanded ? (
