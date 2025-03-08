@@ -4,14 +4,14 @@ import React, { useEffect, useState } from 'react';
 import { isObject, omitObject } from "../utils/objectUtils";
 import { fetchFormMandatoryFields } from "../utils/form";
 
-import { RESTRICTED_ATTRIBUTE_KEYS } from "../constants/application";
+import { RESTRICTED_ATTRIBUTE_KEYS, DEFAULT_FORM_VALUES } from "../constants/application";
 import { FormElements } from "./FormElements"
 
 interface IFormBuilderProps {
   formJson: any;
   formState: any;
   id: string;
-  handleFieldChange: Function;
+  handleFieldChange?: Function;
 }
 
 interface stateProps {
@@ -22,7 +22,7 @@ interface stateProps {
 
 export const FormBuilder = (props: IFormBuilderProps) => {
   const { formJson = {}, formState, id = "" } = props;
-  const [state, setFormState] = useState<stateProps>(formState || { values: {}, touched: {}, errors: {} });
+  const [state, setFormState] = useState<stateProps>(formState || DEFAULT_FORM_VALUES);
   const [stateFormJson, setFormJson] = useState(formJson);
   const { touched }: stateProps = state;
 

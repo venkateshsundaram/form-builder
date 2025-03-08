@@ -22,9 +22,9 @@ export interface Question {
   questionType?: QuestionType;
   numberType?: string;
   label: string;
-  required?: boolean;
+  isRequired?: boolean;
   isParagraph?: boolean;
-  hidden?: boolean;
+  isHidden?: boolean;
   helpText?: string;
   min?: string;
   max?: string;

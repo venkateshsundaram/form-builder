@@ -35,11 +35,11 @@ export const fetchQuestionFormJson = (params: any = {}) => {
                     }, {
                         name: "min",
                         label: "Min",
-                        type: "text"
+                        type: "number"
                     }, {
                         name: "max",
                         label: "Max",
-                        type: "text"
+                        type: "number"
                     }]
                 }, {
                     name: "select",

@@ -19,11 +19,14 @@ export const DEFAULT_SELECT_OPTIONS = [{
     attributes: [{
         name: "selectOption1",
         label: "Option",
-        type: "text"
+        type: "text",
+        required: true
     }, {
         name: "deleteselectOption1",
         label: "Remove",
         type: "button",
         color: "red"
     }]
-}]
+}];
+
+export const DEFAULT_FORM_VALUES = { values: {}, touched: {}, errors: {} };

@@ -19,6 +19,7 @@ import {
 import { Question } from "../../types/form";
 import { saveQuestion, deleteQuestion, getForm } from "../../utils/api";
 import QuestionEditor from "./QuestionEditor";
+import FormRenderer from "../../components/FormRenderer";
 
 interface QuestionBuilderProps {
     questionBuilderId: string,
@@ -56,8 +57,8 @@ export default function QuestionBuilder({ questionBuilderId }: QuestionBuilderPr
             id: crypto.randomUUID(),
             questionType: "",
             label: '',
-            required: false,
-            hidden: false
+            isRequired: false,
+            isHidden: false
         };
         setQuestions(prev => [...prev, newQuestion]);
     };
@@ -149,6 +150,9 @@ export default function QuestionBuilder({ questionBuilderId }: QuestionBuilderPr
                     </DndContext>
                 </div>
             }
+            <FormRenderer 
+                savedQuestions={questions}
+            />
         </>
     );
 }

@@ -42,7 +42,7 @@ const Textbox = ({ data, handleChange, name, 'aria-describedby': ariaDescribedBy
 }
 
 const Numberbox = ({ data, handleChange, name, 'aria-describedby': ariaDescribedBy, id = "", key = "", error = "" }: IFormFieldsProps) => {
-    const { className = "", required = false, style = {}, label = "", autoComplete = "on", placeholder = "", fieldProps = {} } = data;
+    const { className = "", required = false, style = {}, label = "", autoComplete = "on", placeholder = "", fieldProps = {}, min ="", max ="" } = data;
 
     return (
         <div className="relative mt-2 mb-2 w-full">
@@ -51,11 +51,20 @@ const Numberbox = ({ data, handleChange, name, 'aria-describedby': ariaDescribed
                     type="number"
                     aria-describedby={ariaDescribedBy}
                     id={id || key || name}
+                    min={min}
+                    max={max}
                     disabled={data?.disabled}
                     value={data?.value ?? ""}
                     style={style}
                     autoComplete={autoComplete}
-                    onChange={(e: any) => handleChange(e.target.value, name, data)}
+                    onChange={(e: any) => {
+                        const re = /^[0-9\b]+$/;
+                        if (e.target.value === '' || re.test(e.target.value)
+                        && (!min || (min && min<e.target.value)) &&
+                        (!max || (max && max>e.target.value))) {
+                            handleChange(e.target.value, name, data);
+                        }
+                    }}
                     placeholder={placeholder}
                     {...fieldProps}
                     className={`${className} border-1 peer block w-full appearance-none rounded-lg border border-${error ? "red" : "gray"}-300 bg-transparent px-2.5 pb-2.5 pt-4 text-sm text-${error ? "red" : "gray"}-900 focus:border-${error ? "red" : "blue"}-600 focus:outline-none focus:ring-0`}
@@ -175,9 +184,33 @@ export const Buttons = ({ data, handleChange, name, 'aria-describedby': ariaDesc
                 e.preventDefault();
                 handleChange(e.target.checked, name, data);
             }}
-            className={`${className} px-3 py-2 text-${color}-500 hover:text-${color}-700`}>
+            className={`${className} ${data.disabled? "opacity-50": ""} px-3 py-2 text-${color}-500 hover:text-${color}-700`}>
             {label}
         </button>
     );
 }
-export { Textbox, Listbox, Numberbox, CheckBox, RadioBox };
+
+const TextArea = ({ data, handleChange, name, 'aria-describedby': ariaDescribedBy, id = "", key = "", error = "" }: IFormFieldsProps) => {
+    const { className = "", required = false, style = {}, label = "", autoComplete = "on", placeholder = "", fieldProps = {}, rows= 3 } = data;
+
+    return (
+        <div className="relative mt-2 mb-2 mr-2 w-full">
+            <textarea
+                rows={rows}
+                aria-describedby={ariaDescribedBy}
+                id={id || key || name}
+                disabled={data?.disabled}
+                value={data?.value ?? ""}
+                style={style}
+                autoComplete={autoComplete}
+                required={required}
+                onChange={(e: any) => handleChange(e.target.value, name, data)}
+                placeholder={placeholder || label}
+                {...fieldProps}
+                className={`${className} py-2 px-3 sm:py-3 sm:px-4 block w-full border-${error ? "red" : "gray"}-200 rounded-lg sm:text-sm focus:border-${error ? "red" : "blue"}-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600`}
+            />
+            {error && <p id={id || key || name} className="mt-2 text-xs text-red-600 dark:text-red-400">{error}</p>}
+        </div>
+    );
+}
+export { Textbox, Listbox, Numberbox, CheckBox, RadioBox, TextArea };

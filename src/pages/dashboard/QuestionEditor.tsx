@@ -8,11 +8,11 @@ import clsx from 'clsx';
 import { Question } from '../../types/form';
 
 import { fetchQuestionFormJson } from "../../constants/forms";
-import { DEFAULT_SELECT_OPTIONS } from "../../constants/application";
+import { DEFAULT_SELECT_OPTIONS, DEFAULT_FORM_VALUES } from "../../constants/application";
 import { FormBuilder } from '../../components/FormBuilder';
 
 import { debounce } from '../../utils/api';
-import { fetchFormMandatoryFields } from "../../utils/form";
+import { fetchFormMandatoryFields, disbleFormAttr } from "../../utils/form";
 
 interface QuestionEditorProps {
   question: Question;
@@ -26,7 +26,7 @@ interface QuestionEditorProps {
 export default function QuestionEditor({ question, onChange, onDelete, isSaving, saved, resetSavedStaus }: QuestionEditorProps) {
   const [localQuestion, setLocalQuestion] = useState(question);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [formState, setFormState] = useState({ values: {}, touched: {}, errors: {} });
+  const [formState, setFormState] = useState(DEFAULT_FORM_VALUES);
   const [formJson, setFormJson] = useState<any>();
   const [savedState, setSavingState] = useState(saved);
   const [selectedOptions, setSelectedOptions] = useState<any>(DEFAULT_SELECT_OPTIONS);
@@ -76,19 +76,20 @@ export default function QuestionEditor({ question, onChange, onDelete, isSaving,
         numberType: question.numberType,
         min: question.min,
         max: question.max,
-        required: question.required,
-        hidden: question.hidden,
+        required: question.isRequired,
+        hidden: question.isHidden,
         helpText: question.helpText
       }
     }));
     const questionKeys = Object.keys(question);
     const selectedOptionKeys = questionKeys.filter((key)=> key.includes("selectOption") && question[key as keyof typeof question]);
-    const newOptions = selectedOptionKeys.length >0 ? selectedOptionKeys.map((key: string) => {
+    let newOptions = selectedOptionKeys.length >0 ? selectedOptionKeys.map((key: string) => {
       return {
         layout: "horizontal",
         attributes: [{
           name: key,
           label: "Option",
+          required: true,
           type: "text"
         }, {
           name: `delete${key}`,
@@ -98,6 +99,7 @@ export default function QuestionEditor({ question, onChange, onDelete, isSaving,
         }]
       }
     }) : selectedOptions;
+    newOptions = disbleFormAttr(newOptions);
     setSelectedOptions(newOptions)
     setFormJson(fetchQuestionFormJson({ selectedOptions: newOptions }));
   }, []);
@@ -119,7 +121,7 @@ export default function QuestionEditor({ question, onChange, onDelete, isSaving,
     let newValues: any = {};
 
     if (name.includes("deleteselectOption")) {
-      const newOptions = selectedOptions.filter((option: any) => option.attributes[1].name !== name);
+      let newOptions = selectedOptions.filter((option: any) => option.attributes[1].name !== name);
       const key = name.replace("delete", "").trim();
       newValues = {
         [key]: ""
@@ -129,14 +131,16 @@ export default function QuestionEditor({ question, onChange, onDelete, isSaving,
         [key]: ""
       }));
       setOnChangeTouched(true);
+      newOptions = disbleFormAttr(newOptions);
       setSelectedOptions(newOptions);
       setFormJson(fetchQuestionFormJson({ selectedOptions: newOptions }));
     } else if (name.includes("addOption")) {
-      const newOptions = selectedOptions.concat({
+      let newOptions = selectedOptions.concat({
         layout: "horizontal",
         attributes: [{
           name: `selectOption${selectedOptions.length + 1}`,
           label: "Option",
+          required: true,
           type: "text"
         }, {
           name: `deleteselectOption${selectedOptions.length + 1}`,
@@ -145,6 +149,7 @@ export default function QuestionEditor({ question, onChange, onDelete, isSaving,
           color: "red"
         }]
       });
+      newOptions = disbleFormAttr(newOptions);
       setSelectedOptions(newOptions);
       setFormJson(fetchQuestionFormJson({ selectedOptions: newOptions }));
     }  else {
@@ -267,7 +272,6 @@ export default function QuestionEditor({ question, onChange, onDelete, isSaving,
       }));
       setOnChangeTouched(true);
     }
-
   }
 
   return (

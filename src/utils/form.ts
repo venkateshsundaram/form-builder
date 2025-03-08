@@ -12,7 +12,7 @@ export function fetchFormMandatoryFields(formJson: any, formParams: any = {}) {
 }
 
 function appendAttributeMandatoryFields(attributes: any, params: any = {}) {
-    const { values= {}} = params;
+    const { values = {} } = params;
 
     if (Array.isArray(attributes)) {
         attributes.forEach((attribute: any) => {
@@ -28,7 +28,7 @@ function appendAttributeMandatoryFields(attributes: any, params: any = {}) {
                 if (dependentAttributeItem?.attributes) {
                     appendAttributeMandatoryFields(dependentAttributeItem.attributes, params)
                 }
-            } else if (Array.isArray(attribute.attributes)){
+            } else if (Array.isArray(attribute.attributes)) {
                 appendAttributeMandatoryFields(attribute.attributes, params)
             }
 
@@ -37,4 +37,71 @@ function appendAttributeMandatoryFields(attributes: any, params: any = {}) {
             }
         })
     }
+}
+
+export function fetchFormBuilderJson(questions: Array<any>) {
+    let formJson: any = { attributes: [] };
+    questions.forEach((question: any, questionIndex: number) => {
+
+        switch (question.questionType) {
+            case "text":
+                formJson.attributes.push({
+                    name: `question${questionIndex}`,
+                    label: question.label,
+                    type: question.isParagraph ? "textarea": "text",
+                    required: question.isRequired,
+                    hidden: question.isHidden,
+                    paragraph: question.isParagraph
+                })
+                break;
+            case "number":
+                formJson.attributes.push({
+                    name: `question${questionIndex}`,
+                    label: question.label,
+                    type: "number",
+                    min: question.min,
+                    max: question.max,
+                    required: question.isRequired,
+                    hidden: question.isHidden
+                })
+                break;
+            case "select":
+                const questionKeys = Object.keys(question);
+                const optionKeys = questionKeys.filter((key: string) => key.startsWith("selectOption") && question[key])
+                optionKeys.sort();
+                formJson.attributes.push({
+                    name: `question${questionIndex}`,
+                    label: question.label,
+                    type: "list",
+                    required: question.isRequired,
+                    hidden: question.isHidden,
+                    options: optionKeys.map((key: string) => ({
+                        value: question[key],
+                        label: question[key],
+                    }))
+                })
+                break;
+            default:
+                break;
+        }
+    });
+
+    return formJson;
+}
+
+export function disbleFormAttr(options: Array<any>) {
+    return options.map((option: any, optionIndex: number, all: Array<any>) => {
+        if (optionIndex === 0) {
+            return {
+                ...option,
+                attributes: option.attributes.map((attr: any) => {
+                    if (attr.label === "Remove") {
+                        return { ...attr, disabled: all.length ===1 }
+                    }
+                    return attr;
+                })
+            }
+        }
+        return option;
+    });
 }
