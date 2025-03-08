@@ -48,7 +48,7 @@ const Numberbox = ({ data, handleChange, name, 'aria-describedby': ariaDescribed
         <div className="relative mt-2 mb-2 w-full">
             <div className="relative">
                 <input
-                    type="number"
+                    type="text"
                     aria-describedby={ariaDescribedBy}
                     id={id || key || name}
                     min={min}
@@ -58,8 +58,7 @@ const Numberbox = ({ data, handleChange, name, 'aria-describedby': ariaDescribed
                     style={style}
                     autoComplete={autoComplete}
                     onChange={(e: any) => {
-                        const re = /^[0-9\b]+$/;
-                        if ((e.target.value === '' || re.test(e.target.value))
+                        if ((e.target.value === '' || /^\d*$/.test(e.target.value))
                         ) {
                             handleChange(e.target.value, name, data);
                         }
