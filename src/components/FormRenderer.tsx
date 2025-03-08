@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
-
 import clsx from 'clsx';
+
 import { FormBuilder } from './FormBuilder';
 import { DEFAULT_FORM_VALUES } from "../constants/application"
 import { fetchFormBuilderJson, fetchFormMandatoryFields } from "../utils/form";
