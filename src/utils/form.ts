@@ -65,7 +65,11 @@ export function fetchFormBuilderJson(questions: Array<any>) {
                     hidden: question.isHidden,
                     validationCB: function(field: any) {
                         const value = field.value;
-                        if (!(value>=field.min && value<=field.max)) {
+                        if ((parseInt(value)>=parseInt(field.min)) && (parseInt(value)<=parseInt(field.max))) {
+                            return {
+                                valid: true
+                            }
+                        } else {
                             return {
                                 valid: false,
                                 message: `Value should between ${field.min} and ${field.max}`
